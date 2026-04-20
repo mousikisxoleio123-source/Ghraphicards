@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Symmetric App - Full Dice & Cards Game</title>
+    <title>Symmetric App - Final Logo Position</title>
     <style>
         body, html {
             margin: 0; padding: 0; height: 100%; width: 100%;
@@ -21,8 +21,31 @@
             perspective: 2000px; z-index: 1; transition: filter 0.5s ease;
         }
 
-        /* Blur εφέ όταν μια κάρτα είναι ανοιχτή στο κέντρο */
-        body.card-is-open #app-container { filter: blur(8px) brightness(0.4); pointer-events: none; }
+        /* ΤΟ ΛΟΓΟΤΥΠΟ - ΕΝΑ ΚΛΙΚ ΠΙΟ ΠΑΝΩ */
+        #logo-container {
+            position: fixed;
+            top: 22%; /* Τελική ρύθμιση για τέλεια απόσταση */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #background-logo {
+            width: 40vw; 
+            max-width: 450px; 
+            height: auto;
+            opacity: 1;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+
+        body.card-is-open #app-container,
+        body.card-is-open #logo-container { 
+            filter: blur(8px) brightness(0.4); 
+        }
 
         #central-display {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -30,12 +53,13 @@
             justify-content: center; align-items: center; z-index: 1000; pointer-events: none;
         }
 
-        /* ΣΤΥΛ ΓΙΑ ΤΑ ΖΑΡΙΑ */
         #dice-wrapper {
             pointer-events: auto; 
             display: flex; 
             flex-direction: column;
             align-items: center;
+            margin-top: 100px; 
+            z-index: 1001;
         }
 
         .dice-row {
@@ -46,89 +70,45 @@
             background-color: rgba(255, 255, 255, 0.08); 
             backdrop-filter: blur(5px); 
             border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.4); 
+            outline: 1px solid rgba(255, 255, 255, 0.05); 
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
         .dice-container {
-            width: 140px;
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 140px; height: 140px;
+            display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
         }
 
         .dice-container img { max-width: 100%; height: auto; }
 
         #roll-btn {
-            padding: 14px 40px; 
-            font-size: 18px; 
-            font-weight: bold;
-            cursor: pointer; 
-            background-color: rgba(255, 255, 255, 0.7);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(2px);
+            padding: 14px 40px; font-size: 18px; font-weight: bold;
+            cursor: pointer; background-color: rgba(255, 255, 255, 0.7);
+            color: #000; border: none; border-radius: 50px;
+            transition: all 0.3s ease; backdrop-filter: blur(2px);
         }
 
-        #roll-btn:hover { background-color: #fff; transform: scale(1.05); }
-        #roll-btn:disabled { opacity: 0.3; }
-
-        /* ΣΤΥΛ ΚΑΡΤΩΝ */
+        .grid-card { z-index: 5; position: relative; width: 100%; max-width: 240px; aspect-ratio: 3/2; margin: auto; cursor: pointer; }
         .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
         .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .card-back { background-image: url('back.png'); display: flex; align-items: center; justify-content: center; }
+        .card-back::after { content: attr(data-number); font-size: 40px; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
-        .card-back { 
-            background-image: url('back.png'); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        
-        .card-back::after { 
-            content: attr(data-number); 
-            font-size: 40px; 
-            font-weight: bold; 
-            color: white; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
-            transition: all 0.4s ease;
-        }
-
-        /* Εφέ όταν το άθροισμα των ζαριών ταιριάζει με την κάρτα */
-        .grid-card.dice-match .card-back::after {
-            color: #ff3333; 
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 2px 2px 4px rgba(0,0,0,0.8);
-            transform: scale(1.2);
-        }
-
+        .grid-card.dice-match .card-back::after { color: #ff3333; text-shadow: 0 0 15px rgba(255, 255, 255, 0.9); transform: scale(1.2); }
         .card-front { transform: rotateY(180deg); }
-
-        .grid-card { 
-            width: 100%; max-width: 240px; aspect-ratio: 3/2; 
-            margin: auto; cursor: pointer; transition: opacity 0.4s; 
-        }
-
         .grid-card.is-open { opacity: 0; pointer-events: none; }
 
-        /* Κεντρική κάρτα (Popup) */
-        .centered-card { 
-            width: 85vw; height: 85vh; max-width: 1000px; 
-            display: flex; justify-content: center; align-items: center; 
-            cursor: pointer; pointer-events: auto; animation: cardPop 0.5s ease-out; 
-        }
-
+        .centered-card { width: 85vw; height: 85vh; max-width: 1000px; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; z-index: 20000; }
         .centered-card .card-inner { transform: rotateY(180deg); width: 100%; height: 100%; }
-
-        @keyframes cardPop { 
-            from { opacity: 0; transform: scale(0.5); } 
-            to { opacity: 1; transform: scale(1); } 
-        }
     </style>
 </head>
 <body>
+
+    <div id="logo-container">
+        <img id="background-logo" src="logocards.png" alt="Logo">
+    </div>
 
     <div id="app-container"></div>
 
@@ -144,13 +124,10 @@
     </div>
 
     <script>
-        // Ηχητικά
         const flipSound = new Audio('soundcard.mp3');
         const diceSound = new Audio('zarisound.mp3');
-
         function playFlipSound() { flipSound.currentTime = 0; flipSound.play().catch(()=>{}); }
 
-        // Δεδομένα Καρτών
         const cardImages = ['a.png','b.png','c.png','d.png','e.png','f.png','g.png','h.png','i.png','k.png','l.png','m.png','n.png','o.png','p.png','q.png','r.png','s.png'];
         const finalSlots = [
             {r: 1, c: 1}, {r: 1, c: 2}, {r: 1, c: 3}, {r: 1, c: 4}, {r: 1, c: 5},
@@ -163,77 +140,45 @@
         const centralDisplay = document.getElementById('central-display');
         const diceWrapper = document.getElementById('dice-wrapper');
 
-        function getRandomDice() {
-            return Math.floor(Math.random() * 7); 
-        }
+        function getRandomDice() { return Math.floor(Math.random() * 7); }
 
-        // Λειτουργία Κοκκινίσματος
         function highlightMatchingCard(sum) {
-            // Καθαρισμός προηγούμενων
             document.querySelectorAll('.grid-card').forEach(card => card.classList.remove('dice-match'));
-            
-            // Έλεγχος αν το άθροισμα αντιστοιχεί σε κάρτα (1-18)
             if (sum >= 1 && sum <= 18) {
                 const targetBack = gridContainer.querySelector(`.card-back[data-number="${sum}"]`);
-                if (targetBack) {
-                    targetBack.closest('.grid-card').classList.add('dice-match');
-                }
+                if (targetBack) targetBack.closest('.grid-card').classList.add('dice-match');
             }
         }
 
-        // Λειτουργία Ζαριών
         function rollAllDice() {
-            const d1 = document.getElementById('dice1');
-            const d2 = document.getElementById('dice2');
-            const d3 = document.getElementById('dice3');
+            const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2'), d3 = document.getElementById('dice3');
             const btn = document.getElementById('roll-btn');
-            
-            highlightMatchingCard(-1); // Καθαρισμός
+            highlightMatchingCard(-1);
             btn.disabled = true;
-            
             diceSound.currentTime = 0;
             diceSound.play().catch(()=>{});
-
-            const duration = (diceSound.duration || 2) * 1000; 
+            const duration = (diceSound.duration || 2) * 1000;
             const startTime = Date.now();
-
             const interval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                if (elapsed < duration) {
-                    d1.src = getRandomDice() + 'z.png';
-                    d2.src = getRandomDice() + 'z.png';
-                    d3.src = getRandomDice() + 'z.png';
+                if (Date.now() - startTime < duration) {
+                    d1.src = getRandomDice() + 'z.png'; d2.src = getRandomDice() + 'z.png'; d3.src = getRandomDice() + 'z.png';
                 } else {
                     clearInterval(interval);
-                    const v1 = getRandomDice();
-                    const v2 = getRandomDice();
-                    const v3 = getRandomDice();
-                    
-                    d1.src = v1 + 'z.png';
-                    d2.src = v2 + 'z.png';
-                    d3.src = v3 + 'z.png';
-
-                    highlightMatchingCard(v1 + v2 + v3); // Χρήση Αθροίσματος
+                    const v1 = getRandomDice(), v2 = getRandomDice(), v3 = getRandomDice();
+                    d1.src = v1 + 'z.png'; d2.src = v2 + 'z.png'; d3.src = v3 + 'z.png';
+                    highlightMatchingCard(v1 + v2 + v3);
                     btn.disabled = false;
                 }
             }, 80);
         }
 
-        // Δημιουργία Grid
         cardImages.forEach((img, index) => {
             const gridCard = document.createElement('div');
             gridCard.className = 'grid-card';
             gridCard.dataset.cardId = index;
             const slot = finalSlots[index];
-            gridCard.style.gridRow = slot.r;
-            gridCard.style.gridColumn = slot.c;
-            
-            gridCard.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-back" data-number="${index + 1}"></div>
-                    <div class="card-front" style="background-image: url('${img}')"></div>
-                </div>
-            `;
+            gridCard.style.gridRow = slot.r; gridCard.style.gridColumn = slot.c;
+            gridCard.innerHTML = `<div class="card-inner"><div class="card-back" data-number="${index + 1}"></div><div class="card-front" style="background-image: url('${img}')"></div></div>`;
             
             gridCard.addEventListener('click', function() {
                 if (centralDisplay.querySelectorAll('.centered-card').length < 1) {
@@ -241,27 +186,20 @@
                     this.classList.add('is-open');
                     document.body.classList.add('card-is-open');
                     diceWrapper.style.display = 'none';
-
                     const centralCard = document.createElement('div');
                     centralCard.className = 'centered-card';
                     centralCard.dataset.gridId = this.dataset.cardId;
                     centralCard.innerHTML = this.innerHTML;
-
                     const centralFront = centralCard.querySelector('.card-front');
-                    const originalImage = centralFront.style.backgroundImage;
-                    centralFront.style.backgroundImage = `${originalImage}, url('Fontwn.png')`;
-                    centralFront.style.backgroundSize = "contain, cover";
-
+                    centralFront.style.backgroundImage = `${centralFront.style.backgroundImage}, url('Fontwn.png')`;
                     centralCard.addEventListener('click', function() {
                         playFlipSound();
                         const originalGridCard = gridContainer.querySelector(`.grid-card[data-card-id="${this.dataset.gridId}"]`);
                         if (originalGridCard) originalGridCard.classList.remove('is-open');
                         document.body.classList.remove('card-is-open');
                         this.remove();
-                        highlightMatchingCard(-1); // Επαναφορά χρωμάτων
                         diceWrapper.style.display = 'flex';
                     });
-
                     centralDisplay.appendChild(centralCard);
                 }
             });
